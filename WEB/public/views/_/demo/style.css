@@ -1,0 +1,10 @@
+@import url("../_common/style/commonStyle.css");
+
+html {
+    --light-grey-background: #fafafa;
+    --dark-grey-border: #444;
+}
+
+#cont {
+    padding: 0 10%;
+}

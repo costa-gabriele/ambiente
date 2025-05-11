@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html>
+	
+	<head>
+		<title>Routes table</title>
+		<link rel="stylesheet" type="text/css" href="style.css" />
+	</head>
+	
+	<body>
+		
+		<div id="cont">
+									
+			<!--{{VIEW:}}-->
+			<table>
+				<tr>
+					<th>Label</th>
+					<th>Type</th>
+					<th>URI</th>
+					<th>Destination path</th>
+				</tr>
+				<!--{{FOREACH(exactRoutes):}}-->
+				<tr>
+					<td>{{[label]}}</td>
+					<td>{{[type]}}</td>
+					<td>{{[#]}}</td>
+					<td>{{[path]}}</td>
+				</tr>
+				<!--{{FOREACH(exactRoutes);}}-->
+				<!--{{FOREACH(patternRoutes):}}-->
+				<tr>
+					<td>{{[label]}}</td>
+					<td>{{[type]}}</td>
+					<td>{{[#]}}</td>
+					<td>{{[path]}}</td>
+				</tr>
+				<!--{{FOREACH(patternRoutes);}}-->
+			</table>
+			<!--{{VIEW;}}-->
+			
+		</div>
+		
+	</body>
+	
+</html>

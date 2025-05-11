@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+
+<html>
+	
+	<head>
+		<link rel="stylesheet" type="text/css" href="style.css" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	</head>
+	
+	<body>
+		
+		<!-- The tag VIEW is used to signal which part of the document has to be retrieved; the rest is ignored. -->
+
+		<!--{{VIEW:}}-->
+		<ul>
+			<!--{{FOREACH(list):}}-->
+			<li>{{[#]}}: {{[@]}}</li>
+			<!--{{FOREACH(list);}}-->
+		</ul>
+		<!--{{VIEW;}}-->
+		
+	</body>
+	
+</html>
