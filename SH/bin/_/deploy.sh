@@ -59,7 +59,7 @@ then
 	echo "Starting the deployment..."
 
 	nFiles=0
-	installationFile="${DB_DEPLOYMENT_DIR}/install.sql"
+	installationFile="${DB_DEPLOYMENT_DIR}/install.txt"
 	cat "${DB_INSTALLATION_FILE}" | while read path || [ -n "${path}" ]
 	do
 		sourceFile="${DB_REPOSITORY_DIR}/${path}"

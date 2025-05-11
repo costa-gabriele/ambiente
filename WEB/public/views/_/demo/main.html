@@ -16,9 +16,18 @@
 			
 			<p>{{text.paragraph}}</p>
 			
+			<h2>List</h2>
+			
 			<!-- Import list.html -->
 
 			<!--{{VIEW(_/demo/list)}}-->
+			
+			<h2> Multi-dimensional list</h2>
+			<ul>
+				<!--{{FOREACH(multiList):}}-->
+				<li>{{[#]}}: {{[0]}}, {{[1]}}, {{[third]}}</li>
+				<!--{{FOREACH(multiList);}}-->
+			</ul>
 			
 		</div>
 		

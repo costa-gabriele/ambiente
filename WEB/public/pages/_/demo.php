@@ -13,7 +13,11 @@ _NV\View::retrieve (
             'First' => 'lorem',
             'ipsum',
             'Other' => 'dolor'
-        ]
+        ],
+		'multiList' => [
+			['A', 'B', 'third' => 'C'],
+			['D', 'E', 'third' => 'F']
+		]
     ]
 );
 
