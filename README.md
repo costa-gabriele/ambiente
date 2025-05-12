@@ -43,12 +43,17 @@ In particular, it simplifies route management and the dynamic rendering of HTML 
   - `ws`
 - _.htaccess_
 
+## Installation and deployment
+The shell script `SH/bin/_/.install.sh` installs the framework in the directory provided as first argument. The second argument is either `i` for an initial, complete installation, or `u`, to update an existing installation. (You can also just manually copy the files inside your project directory). The file is hidden because it is not intended to be used in the project folder in which the framework is installed.
+
+The shell script `SH/bin/_/deploy.sh` executes the deployment of the project. The first argument is either `web`, for a deployment of the `WEB` directory, or `db`, to execute the SQL files in `DB/install.txt`. The configuration parameters for the deployment can be set in the file `SH/bin/_/deployParams.sh`.
+
 ## Dynamic HTML
 In the `WEB/public` directory, there are two subdirectories intended for the web pages files: `pages` and `views`.  
 The .php files that contain the back-end elaboration should go in the `pages` directory, whereas `views` is for the front-end files (e.g. .html, .css, .js).  
-Each .php file in `pages` must have a corresponding subdirectory in `views`. For example, the front-end files for the page pages/category1/page1.php should go in the directory `views/category1/page1/`.  
+Each .php file in `pages` must have a corresponding subdirectory in `views`. For example, the front-end files for the page `pages/category1/page1.php` should go in the directory `public/views/category1/page1/`.  
 
-The HTML file for the page can be retrieved by the .php file using the static method `retrieve(viewName, viewData)` of the class `\_\Navigation\View` (in the directory `private/classes/_/Navigation`), where `viewName` is the path of the .html file relative to the `views` directory, without the extension (e.g. category1/page1/main) and `viewData` is an array containing the dynamic content of the page. The dynamic parts of the page can be handled with placeholders and tags that are parsed by the View class.  
+The HTML file for the page can be retrieved by the .php file using the static method `retrieve(viewName, viewData)` of the class `\_\Navigation\View` (in the directory `private/classes/_/Navigation`), where `viewName` is the path of the .html file relative to the `views` directory, without the extension (e.g. `category1/page1/main`) and `viewData` is an array containing the dynamic content of the page. The dynamic parts of the page can be handled with placeholders and tags that are parsed by the View class.  
 
 ### Placeholders
 A placeholder for a dynamic value, to be substituted with the content received from the .php file, is enclosed by double curly braces (e.g. `{{text.title}}`); the `viewData` array passed as the second argument to the `View::retrieve` method should have a corresponding entry, i.e. `['text' => ['title' => 'The title of the page']]`.
@@ -73,10 +78,27 @@ Inside the loop, the placeholder `{{[#]}}` stands for the current key of the arr
 
 ### Note
 
-A demo of these functionalities can be found in the page `/_/demo`.
+A demo of these functionalities can be found in the page `_/demo`.
 
-Notice that the syntax of both placeholders and tags is intended to maintain a valid HTML document. An .html file that contains placholders and tags can be opened with a web browser to see a previerw of the page; the tags are ignored since they are inside comments, and placeholders will be showed literally.
+Notice that the syntax of both placeholders and tags is intended to maintain a valid HTML document. An .html file that contains placholders and tags can be opened with a web browser to see a preview of the page; the tags are ignored since they are inside comments, and placeholders will be showed literally.
 
 ## Routes
 
+The .htaccess file redirects every request to the router file `private/admin/router.php` (this is the default behavior, but the web server configuration file can be edited to redirect only certain kinds of requests).
+
+The routes are managed by the the class `_\Navigation\Route` in the directory `private/classes/_/Navigation`. The main methods to set up a route are:
+
+- `addPage(pageName, requestURIs)`  
+Creates a route for a page. The name of the page, to be passed as the first argument, is the path relative to `public/pages/`, without any file extension. The second argument is optional, and it's an array of the URIs that are to be mapped to the page; if it's not provided, the default URI is used, which is the page name appended to the URI root for page requests, defined by the global constant PAGE_URI_ROOT in `private/config/params`. The default root is the base URL of the website. So for example, to set up a route for the page `www.site.org/about/`, the command would be `Route::addPage('about')`. This maps the URI to the file `public/pages/about.php` and also sets up routes for the files in `public/views/about`.
+
+- `addWebService(pageName, requestURIs)`  
+Creates a route for a web service. The name of the web service, to be passed as the first argument, is the path relative to `public/ws/`, without any file extension. The second argument is optional, and it's an array of the URIs that are to be mapped to the page; if it's not provided, the default URI is used, which is the web service name appended to the URI root for web service requests, defined by the global constant WS_URI_ROOT in `private/config/params`. The default root is obtained appending `ws` to the base URL of the website. So for example, to set up a route for the web service `www.site.org/web-service`, the command would be `Route::addWebService('web-service')`. This maps the URI to the file `public/ws/web-service.php`.
+
+- `addPattern(requestURIPattern, destinationPath)`  
+Creates a rule that maps all the requests that match the pattern provided as the first argument, to the path provided as the second argument. Regular expressions group captures can be used in defining these rules: for example, `Route::addPattern('ruleDir/' . '(.+)', 'ruleDir/route/' . '$1')` would map `www.site.org/ruleDir/test` to  `www.site.org/ruleDir/route/test`.
+
+
 ## Other functionalities
+
+### Web services
+The class `_\Network\WebService` provides useful methods to create a web service controller. See for example the demo webservice `public/ws/_/demo/loadFiles.php`.
