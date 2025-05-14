@@ -1,0 +1,15 @@
+# htaccess
+
+<IfModule mod_rewrite.c>
+	
+	RewriteEngine on
+
+	RewriteCond %{REQUEST_URI} !(^.*\.[a-zA-Z0-9]+$)
+	RewriteCond %{REQUEST_URI} !(.*)/$
+	RewriteCond %{REQUEST_URI} !(/ws/(.*)$)
+	RewriteRule (^.*[^/])$ %{REQUEST_URI}/ [L,R=301]
+
+	RewriteRule private/admin/router.php - [L]
+	RewriteRule ^(.*)$ private/admin/router.php
+	
+</IfModule>

@@ -48,10 +48,10 @@ echo "Installation type: "
 if [ $installationType = "i" ]
 then
 	echo "initial"
-	rsync -av --exclude "*/.install.sh" "${sourceDir}/". "${targetDir}"
+	rsync -av --exclude "*/.install.sh" --exclude ".git" "${sourceDir}/". "${targetDir}"
 else
 	echo "update"
-	rsync -av --exclude "*/.install.sh" --exclude-from="${excludeFile}" "${sourceDir}/". "${targetDir}"
+	rsync -av --exclude "*/.install.sh" --exclude ".git" --exclude-from="${excludeFile}" "${sourceDir}/". "${targetDir}"
 fi
 
 outcome=${?}
