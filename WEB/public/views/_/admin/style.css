@@ -3,7 +3,9 @@
 html {
     --light-grey-background: #fafafa;
     --dark-grey-border: #444;
+    font-family: Arial;
 }
+
 #cont {
     padding: 0 10%;
 }
