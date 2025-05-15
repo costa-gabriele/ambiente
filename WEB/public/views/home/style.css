@@ -1,1 +1,5 @@
 @import url("../_/_common/style/commonStyle.css");
+
+#cont {
+    padding: 0 10%;
+}

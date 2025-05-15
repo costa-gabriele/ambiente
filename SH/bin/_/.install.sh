@@ -28,9 +28,11 @@ fi
 if [ ! -z ${2} ]
 then
 	installationType="${2}"
+else
+	installationType="i"
 fi
 
-if [ $installationType != "i" && $installationType != "u" ]
+if [ "${installationType}" != "i" ] && [ "${installationType}" != "u" ]
 then
 	echo "Invalid installation type."
 	exit 1
@@ -48,10 +50,10 @@ echo "Installation type: "
 if [ $installationType = "i" ]
 then
 	echo "initial"
-	rsync -av --exclude "*/.install.sh" --exclude ".git" "${sourceDir}/". "${targetDir}"
+	rsync -av --exclude "*/.install*" --exclude ".git" "${sourceDir}/". "${targetDir}"
 else
 	echo "update"
-	rsync -av --exclude "*/.install.sh" --exclude ".git" --exclude-from="${excludeFile}" "${sourceDir}/". "${targetDir}"
+	rsync -av --exclude "*/.install*" --exclude ".git" --exclude-from="${excludeFile}" "${sourceDir}/". "${targetDir}"
 fi
 
 outcome=${?}

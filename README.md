@@ -40,13 +40,21 @@ In particular, it simplifies route management and the dynamic rendering of HTML 
 - `public`
   - `pages`
   - `views`
+    - `_`
+      - `_common`
+        - `modules`
+        - `style`
   - `ws`
 - _.htaccess_
 
-## Installation and deployment
-The shell script `SH/bin/_/.install.sh` installs the framework in the directory provided as first argument. The second argument is either `i` for an initial, complete installation, or `u`, to update an existing installation. (You can also just manually copy the files inside your project directory). The file is hidden because it is not intended to be used in the project folder in which the framework is installed.
+## Installation, deployment, and configuration
+The shell script `SH/bin/_/.install.sh` installs the framework in the directory provided as the first argument. The second argument is either `i` for an initial, complete installation, or `u`, to update an existing installation. (You can also just manually copy the files inside your project directory). The file of the installation script is hidden because it is not intended to be used in the project folder in which the framework is installed.
 
 The shell script `SH/bin/_/deploy.sh` executes the deployment of the project. The first argument is either `web`, for a deployment of the `WEB` directory, or `db`, to execute the SQL files in `DB/install.txt`. The configuration parameters for the deployment can be set in the file `SH/bin/_/deployParams.sh`.
+
+The configuration of the server side web environment is managed with the file `WEB/private/config/params.php`. If your project is in a subdirectory of the web server (as in the case of a local development environment), the project root must be specified in the constant `URI_ROOT` (e.g. `URI_ROOT = '/myProject/'`).
+
+The Javascript configuration file is `WEB/public/views/_/_common/modules/_/config.js`. Here you should set up the base URL of the web site.
 
 ## Dynamic HTML
 In the `WEB/public` directory, there are two subdirectories intended for the web pages files: `pages` and `views`.  
@@ -88,15 +96,25 @@ The .htaccess file redirects every request to the router file `private/admin/rou
 
 The routes are managed by the the class `_\Navigation\Route` in the directory `private/classes/_/Navigation`. The main methods to set up a route are:
 
-- `addPage(pageName, requestURIs)`  
-Creates a route for a page. The name of the page, to be passed as the first argument, is the path relative to `public/pages/`, without any file extension. The second argument is optional, and it's an array of the URIs that are to be mapped to the page; if it's not provided, the default URI is used, which is the page name appended to the URI root for page requests, defined by the global constant PAGE_URI_ROOT in `private/config/params`. The default root is the base URL of the website. So for example, to set up a route for the page `www.site.org/about/`, the command would be `Route::addPage('about')`. This maps the URI to the file `public/pages/about.php` and also sets up routes for the files in `public/views/about`.
+- `add(requestURIs, destinationInfo)`  
+Creates a route for all the URIs contained in the array passed as the first argument, mapping them to the destination specified with the second argument, which is an array that can have these keys:  
+  - _type_: one of the following values: `Route::FILE_TYPE`, `Route::PAGE_TYPE`, `Route::WS_TYPE`;
+  - _path_: the path of the file that has to be mapped to the request URI(s);
+  - _label_: can be used to group routes (e.g. all the routes referring to the same page can have the same label).
 
-- `addWebService(pageName, requestURIs)`  
+  The wrapper methods presented below all use this basic method, but are easier to use, because they manage all the operations needed for setting up standard routes. However, in certain cases it may be necessary to add a single route with this basic method.
+
+- `addPage(pageName, requestURIs)`  
+Creates a route for a page. The name of the page, to be passed as the first argument, is the path relative to `public/pages/`, without any file extension. The second argument is optional, and it's an array of the URIs that are to be mapped to the page; if it's not provided, the default URI is used, which is the page name appended to the URI root for page requests, defined by the global constant PAGE_URI_ROOT in `private/config/params`. The default root is the base URL of the website. So for example, to set up a route for the page `www.site.org/about/`, the command would be `Route::addPage('about')`. This maps the URI to the file `public/pages/about.php` and also sets up routes for the files in `public/views/about`. Notice that routes will be created only for the files that are in the view folder at the moment of the execution of the command, and if a file is later added, its route has to be added with `Route::add()`;
+
+- `addWebService(webServiceName, requestURIs)`  
 Creates a route for a web service. The name of the web service, to be passed as the first argument, is the path relative to `public/ws/`, without any file extension. The second argument is optional, and it's an array of the URIs that are to be mapped to the page; if it's not provided, the default URI is used, which is the web service name appended to the URI root for web service requests, defined by the global constant WS_URI_ROOT in `private/config/params`. The default root is obtained appending `ws` to the base URL of the website. So for example, to set up a route for the web service `www.site.org/web-service`, the command would be `Route::addWebService('web-service')`. This maps the URI to the file `public/ws/web-service.php`.
 
 - `addPattern(requestURIPattern, destinationPath)`  
 Creates a rule that maps all the requests that match the pattern provided as the first argument, to the path provided as the second argument. Regular expressions group captures can be used in defining these rules: for example, `Route::addPattern('ruleDir/' . '(.+)', 'ruleDir/route/' . '$1')` would map `www.site.org/ruleDir/test` to  `www.site.org/ruleDir/route/test`.
 
+A few standard routes are initially set, using the methods discussed above, in `private/admin/initRoutes.php`.  
+The page `_/admin` shows all the existing routes.
 
 ## Other functionalities
 

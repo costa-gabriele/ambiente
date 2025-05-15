@@ -1,9 +1,9 @@
 import {
 	WS_RETRIEVE_VIEW_ENDPOINT
-} from './config.js';
+} from "./config.js";
 
 
-async function sendRequest(pEndPointURL, pData = {}, pMethod = 'POST') {
+async function sendRequest(pEndPointURL, pData = {}, pMethod = "POST") {
 	
 	/*
 	* The body of the request can be either multipart/form-data or application/json.
@@ -14,7 +14,7 @@ async function sendRequest(pEndPointURL, pData = {}, pMethod = 'POST') {
 	let data = pData;
 	
 	if(!(pData instanceof FormData)) {
-		headersList['Content-Type'] = 'application/json';
+		headersList["Content-Type"] = "application/json";
 		data = JSON.stringify(pData);
 	}
 	
@@ -61,14 +61,19 @@ async function sendRequest(pEndPointURL, pData = {}, pMethod = 'POST') {
 	
 }
 
-function fillView(pViewTemplate, pViewData) {
+function fillView(pViewTemplate, pViewData, pPrefix = "") {
 	
 	let view = pViewTemplate;
 	
 	for(let content in pViewData) {
-		let contentKey = '{{' + content + '}}';
-		let contentValue = pViewData[content];
-		view = view.replace(contentKey, contentValue);
+
+		if(pViewData[content] && typeof pViewData[content] == "object") {
+			view = fillView(view, pViewData[content], content + ".");
+		} else {
+			let contentKey = "{{" + pPrefix + content + "}}";
+			let contentValue = pViewData[content];
+			view = view.replaceAll(contentKey, contentValue);
+		}
 	}
 	
 	return view;
@@ -76,14 +81,11 @@ function fillView(pViewTemplate, pViewData) {
 }
 
 async function retrieveView(pViewName, pServerElabData = {}, pClientElabData = {}) {
-	
-	let viewData = pServerElabData;
-	
-	if(viewData instanceof FormData) {
-		viewData.append('viewName', pViewName);
-	} else {
-		viewData.viewName = pViewName;
-	}
+		
+	let viewData = {
+		"viewName": pViewName,
+		"viewValues": pServerElabData
+	};
 	
 	return sendRequest(WS_RETRIEVE_VIEW_ENDPOINT, viewData).then (
 		(viewTemplate) => {

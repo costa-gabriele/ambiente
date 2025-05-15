@@ -105,7 +105,7 @@ class Route {
 			},
 			ARRAY_FILTER_USE_BOTH
 		);
-
+		
 		switch($pCategory) {
 			case RouteCategory::EXACT:
 				$arr = &self::$routes['exactURIs'];

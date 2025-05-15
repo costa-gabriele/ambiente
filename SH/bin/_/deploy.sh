@@ -1,6 +1,9 @@
 #!/bin/bash
 
 P_DEPLOYMENT_TYPE=${1}
+fileDir=$(dirname "${0}")
+excludeFile=$(realpath "${fileDir}/../../etc/_/webDeployIgnore.txt")
+
 separator="########"
 
 echo ""
@@ -31,8 +34,7 @@ then
 
 	if [ "${WEB_REPOSITORY_SERVER}" = "localhost" ]
 	then
-		rm -r "${WEB_DEPLOYMENT_DIR}/"
-		cp -r "${WEB_REPOSITORY_DIR}/". "${WEB_DEPLOYMENT_DIR}"
+		rsync -av --exclude-from="${excludeFile}" "${WEB_REPOSITORY_DIR}/". "${WEB_DEPLOYMENT_DIR}"
 	else
 		echo "sftp"
 	fi
