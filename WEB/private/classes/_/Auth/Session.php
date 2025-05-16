@@ -2,62 +2,73 @@
 
 class Session {
 	
-	protected
-		$name,
-		$lifetime
-	;
-	
-	public function __construct(string $pName = DEFAULT_SESSION_NAME, int $pLifetime = DEFAULT_SESSION_LIFETIME) {
+	public static function init(array $pOptions = []) {
 		
-		$this->setName($pName);
-		$this->setLifetime($pLifetime);
+		$name = $pOptions['name'] ?? DEFAULT_SESSION_NAME;
+		$lifetime = $pOptions['lifetime'] ?? DEFAULT_SESSION_LIFETIME;
 		
-		session_name($this->name);
+		if(!empty($pOptions['key'])) {
+			session_id($pOptions['key']);
+		}
+
+		session_name($name);
 		session_start();
 		
-		if(empty($_COOKIE[$this->name]) || empty($_SESSION[SESSION_ARRAY_KEY])) {
+		if(empty($_COOKIE[$name]) || empty(self::getKey())) {
 			
 			if(session_status() == PHP_SESSION_ACTIVE) {
 				session_destroy();
-				setcookie($this->name, '', time()-1);
+				setcookie($name, '', time()-1);
 			}
 			
-			ini_set('session.cookie_lifetime', $this->lifetime);
-			ini_set('session.gc-maxlifetime', $this->lifetime);
+			ini_set('session.cookie_lifetime', $lifetime);
+			ini_set('session.gc-maxlifetime', $lifetime);
 			session_start();
-			
+
+			self::setName($name);
+			self::setKey(session_id());
+			self::setLifetime($lifetime);
+
 		}
 	
 	}
 	
 	# Getters and setters
 	
-	public function get(string $pKey) {
+	public static function get(string $pKey) {
 		return $_SESSION[SESSION_ARRAY_KEY][$pKey];
 	}
+	
+	public static function getName(): ?string {
+		return self::get('sessionName');
+	}
 
-	public static function getName(): string {
-		return $this->name;
+	public static function getKey(): ?string {
+		return self::get('sessionKey');
 	}
-	
-	public static function getKey(): string {
-		return $_SESSION[SESSION_ARRAY_KEY]['key'];
+
+	public static function getLifetime(): ?int {
+		return self::get('sessionLifetime');
 	}
-	
-	public function set(string $pKey, $pValue): bool {
+
+	public static function set(string $pKey, $pValue): bool {
 		$_SESSION[SESSION_ARRAY_KEY][$pKey] = $pValue;
 		return true;
 	}
-
-	public function setName(string $pName): bool {
-		$this->name = $pName;
-		return true;
+	
+	public static function setName(string $pName): bool {
+		return self::set('sessionName', $pName);
 	}
 
-	public function setLifetime(int $pLifetime): bool {
-		$this->lifetime = $pLifetime;
-		return true;
+	public static function setKey(string $pKey): bool {
+		return self::set('sessionKey', $pKey);
 	}
+
+	public static function setLifetime(int $pLifetime): bool {
+		return self::set('sessionLifetime', $pLifetime);
+	}
+
+	# / Getters and setters
 
 }
 

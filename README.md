@@ -61,7 +61,11 @@ In the `WEB/public` directory, there are two subdirectories intended for the web
 The .php files that contain the back-end elaboration should go in the `pages` directory, whereas `views` is for the front-end files (e.g. .html, .css, .js).  
 Each .php file in `pages` must have a corresponding subdirectory in `views`. For example, the front-end files for the page `pages/category1/page1.php` should go in the directory `public/views/category1/page1/`.  
 
-The HTML file for the page can be retrieved by the .php file using the static method `retrieve(viewName, viewData)` of the class `\_\Navigation\View` (in the directory `private/classes/_/Navigation`), where `viewName` is the path of the .html file relative to the `views` directory, without the extension (e.g. `category1/page1/main`) and `viewData` is an array containing the dynamic content of the page. The dynamic parts of the page can be handled with placeholders and tags that are parsed by the View class.  
+The HTML file for the page can be retrieved by the .php file using the static method `retrieve(viewName, viewData)` of the class `\_\Navigation\View` (in the directory `private/classes/_/Navigation`), where `viewName` is the path of the .html file relative to the `views` directory, without the extension (e.g. `category1/page1/main`) and `viewData` is an array containing the dynamic content of the page. The dynamic parts of the page can be handled with placeholders and tags that are parsed by the View class.
+
+The Javascript module `public/views/_/_common/modules/_/req.js` provides a function to retrieve a view through an asynchronous call:  
+`retrieveView(viewName, serverElabData, clientElabData)`  
+The second argument is an object containing the values to be substituted server side (PHP), whereas the values provided in the third argument are processed client side (Javascript).
 
 ### Placeholders
 A placeholder for a dynamic value, to be substituted with the content received from the .php file, is enclosed by double curly braces (e.g. `{{text.title}}`); the `viewData` array passed as the second argument to the `View::retrieve` method should have a corresponding entry, i.e. `['text' => ['title' => 'The title of the page']]`.
@@ -112,6 +116,12 @@ Creates a route for a web service. The name of the web service, to be passed as 
 
 - `addPattern(requestURIPattern, destinationPath)`  
 Creates a rule that maps all the requests that match the pattern provided as the first argument, to the path provided as the second argument. Regular expressions group captures can be used in defining these rules: for example, `Route::addPattern('ruleDir/' . '(.+)', 'ruleDir/route/' . '$1')` would map `www.site.org/ruleDir/test` to  `www.site.org/ruleDir/route/test`.
+
+- `save()`  
+Serializes the routes array and saves it in the file `private/admin/routes.ser` (a different file path can be specified in the constant ROUTES_CACHE_PATH in `private/config/params.php`)
+
+- `getRoutes()`  
+Returns the array containing all the existing routes.
 
 A few standard routes are initially set, using the methods discussed above, in `private/admin/initRoutes.php`.  
 The page `_/admin` shows all the existing routes.

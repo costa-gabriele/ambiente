@@ -6,4 +6,4 @@ WEB/public/pages/404.php
 WEB/public/views/home
 WEB/public/views/404
 WEB/public/views/_/_common/style/commonStyle.css
-WEB/public/views/_/_common/modules/config.js
+WEB/public/views/_/_common/modules/_/config.js

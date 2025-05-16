@@ -93,7 +93,7 @@ class Route {
 		return self::$routes['notFound'];
 	}
 
-	public static function add(array $pRequestURIs, array $pDestinationInfo, RouteCategory $pCategory = RouteCategory::EXACT): bool {
+	public static function add(array $pRequestURIs, array $pDestinationInfo, RouteCategory $pCategory = RouteCategory::EXACT, $pfOverwrite = true): bool {
 		
 		# destinationInfo validation
 		
@@ -122,7 +122,7 @@ class Route {
 			return false;
 
 		foreach($pRequestURIs as $requestURI) {
-			if(empty($arr[$requestURI]))
+			if(empty($arr[$requestURI]) || $pfOverwrite)
 				$arr[$requestURI] = $pDestinationInfo;
 			else
 				return false;
@@ -223,7 +223,6 @@ class Route {
 				'type' => self::WS_TYPE,
 				'label' => $pWebServiceName
 			]
-			
 		);
 		
 	}
