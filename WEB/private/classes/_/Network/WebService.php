@@ -111,7 +111,7 @@ class WebService {
 	public function respond() {
 
 		# HTTP Status code
-		http_response_code($this->statusCode);
+		http_response_code($this->statusCode ?? 200);
 
 		# Headers
 		foreach($this->headers as $key => $values) {

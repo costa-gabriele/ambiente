@@ -24,8 +24,10 @@ class Response implements \JsonSerializable {
 	public function jsonSerialize(): array {
 		
 		$arr = [
-			'code' => $this->code,
-			'messages' => [$this->messages],
+			'outcome' => [
+				'code' => $this->code,
+				'messages' => $this->messages
+			],
 			'data' => $this->data,
 		];
 		
