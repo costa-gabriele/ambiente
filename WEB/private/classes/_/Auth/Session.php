@@ -1,6 +1,6 @@
 <?php namespace _\Auth;
 
-class Session {
+abstract class AbstractSession {
 	
 	public static function init(array $pOptions = []) {
 		
@@ -29,9 +29,13 @@ class Session {
 			self::setKey(session_id());
 			self::setLifetime($lifetime);
 
+			self::onCreation();
+
 		}
 	
 	}
+	
+	abstract protected static function onCreation(): bool;
 	
 	# Getters and setters
 	

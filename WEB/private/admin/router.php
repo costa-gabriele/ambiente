@@ -29,8 +29,12 @@ if(!empty($destinationInfo['path']) && file_exists($destinationInfo['path'])) {
 	
 	$URI_DATA = $destination['input'];
 
+	# Initialization
+	
 	if($destinationInfo['type'] == _NV\Route::PAGE_TYPE && $fileExtension == PAGE_EXTENSION) {
-		require CONFIG_DIR . 'custom.php';
+		require CONFIG_DIR . 'initPage.php';
+	} elseif($destinationInfo['type'] == _NV\Route::WS_TYPE && $fileExtension == WS_EXTENSION) {
+		require CONFIG_DIR . 'initWebService.php';
 	}
 
     require $destinationInfo['path'];
