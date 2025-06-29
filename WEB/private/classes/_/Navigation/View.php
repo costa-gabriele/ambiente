@@ -2,6 +2,10 @@
 
 class View {
 	
+	const REMOVE_UNMATCHED_PLACEHOLDERS = 0;
+	const LEAVE_UNMATCHED_PLACEHOLDERS = 1;
+	const FROM_VALUES_TO_PLACEHOLDERS = 2;
+
 	private static $viewSyntax = [
 		'tagPattern' => ['l' => '<!--\s*\{\{', 'r' => '\}\}\s*-->'],
 		'placeholderPattern' => ['l' => '\{\{', 'r' => '\}\}', 'name' => '%?[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*'],
@@ -15,7 +19,7 @@ class View {
 	private static $foreachTagName = 'FOREACH';
 	private static $absolutePathTagName = 'ABS';
 
-	public static function retrieve(string $pViewName, array $pViewValues = [], bool $pfReturn = false) : bool|string {
+	public static function retrieve(string $pViewName, array $pViewValues = [], int $fpPlaceholderBehavior = self::REMOVE_UNMATCHED_PLACEHOLDERS, bool $pfReturn = false) : bool|string {
 		
 		$viewPath = realpath(VIEW_DIR . str_replace('/', DIR_SEP, $pViewName) . '.' . VIEW_EXTENSION);
 		if(!$viewPath) return false;
@@ -28,10 +32,10 @@ class View {
 			self::parseTag($viewFileString, $viewTag['str'], $viewTag['pos'])['content']
 		;
 		
-		self::resolveSubViewTags($viewString, $pViewValues);
+		self::resolveSubViewTags($viewString, $pViewValues, $fpPlaceholderBehavior);
 		self::resolveLoopTags($viewString, $pViewValues);
 		self::resolveAbsolutePathTags($viewString, dirname($viewPath));
-		self::resolvePlaceholders($viewString, $pViewValues);
+		self::resolvePlaceholders($viewString, $pViewValues, $fpPlaceholderBehavior);
 
 		if($pfReturn) {
 			return $viewString;
@@ -187,12 +191,13 @@ class View {
 		
 	}
 	
-	private static function resolvePlaceholders(string &$pViewString, array $pValues, int $pMode = 0): bool {
+	private static function resolvePlaceholders(string &$pViewString, array $pValues, int $pMode = self::REMOVE_UNMATCHED_PLACEHOLDERS): bool {
 
 		switch($pMode) {
 
-			case 0: # From matched label to values
-
+			# From matched label to values
+			case self::REMOVE_UNMATCHED_PLACEHOLDERS: # Removes unmatched placeholders
+			case self::LEAVE_UNMATCHED_PLACEHOLDERS: # Leaves unmatched placeholders as they are (to be used for subsequent client-side processing)
 				$pattern = self::$viewSyntax['placeholderPattern']['name'];
 				$placeholders = self::find($pattern, $pViewString);
 				
@@ -202,16 +207,17 @@ class View {
 					$label = str_replace(['{', '}'], ['', ''], $placeholder);
 					
 					foreach(explode(self::$viewSyntax['subLabelSeparator'], $label) as $key) {
-						$value = $value[$key] ?? $pValues[$key] ?? '';
+						$value = $value[$key] ?? $pValues[$key] ?? null;
 					}
-					if(!is_array($value)) {
+					if(!is_array($value) && ($pMode == 0 || !is_null($value))) {
 						$pViewString = str_replace(self::composePlaceholder($label, false), $value, $pViewString);
 					}
 					
 				}
 				break;
-
-			case 1: # From values to labels
+			
+			# From values to placeholders
+			case self::FROM_VALUES_TO_PLACEHOLDERS: 
 
 				foreach($pValues as $placeholder => $value) {
 				
@@ -229,7 +235,7 @@ class View {
 
 	}
 	
-	private static function resolveSubViewTags(string &$pViewString, array $pValues): bool {
+	private static function resolveSubViewTags(string &$pViewString, array $pValues, int $fpPlaceholderBehavior): bool {
 
 		$subViewTags = self::find(self::$viewTagName, $pViewString, 1, true);
 		
@@ -240,7 +246,7 @@ class View {
 				
 				$tagData = self::parseTag($pViewString, $subViewTag['str'], $subViewTag['pos'] + $offset);
 				$subViewName = $tagData['argument'];
-				$subViewString = self::retrieve($subViewName, $pValues, true);
+				$subViewString = self::retrieve($subViewName, $pValues, $fpPlaceholderBehavior, true);
 				$pViewString = substr($pViewString, 0, $tagData['tagStart']) . $subViewString . substr($pViewString, $tagData['tagEnd']);
 				$offsetAdjustment = strlen($subViewString) - $tagData['tagLength'];
 				$offset += $offsetAdjustment;
@@ -319,7 +325,7 @@ class View {
 			 */
 			$contentInstance = $content;
 			$placeholderValue = [$instanceKeyPlaceholder => $foreachKey];
-			self::resolvePlaceholders($contentInstance, $placeholderValue, 1);
+			self::resolvePlaceholders($contentInstance, $placeholderValue, self::FROM_VALUES_TO_PLACEHOLDERS);
 			
 			/*
 			 * Substitution of the value
@@ -338,7 +344,7 @@ class View {
 			} else {
 				$placeholderValues = [$instanceValuePlaceholder => $foreachValue];
 			}
-			self::resolvePlaceholders($contentInstance, $placeholderValues, 1);
+			self::resolvePlaceholders($contentInstance, $placeholderValues, self::FROM_VALUES_TO_PLACEHOLDERS);
 			
 			$repeatedString .= $contentInstance;
 

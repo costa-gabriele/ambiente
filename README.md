@@ -67,7 +67,7 @@ ambiente/
 ## Installation, deployment, and configuration
 The shell script `SH/bin/_/.install.sh` installs the framework in the directory provided as the first argument. The second argument is either `i` for an initial, complete installation, or `u`, to update an existing installation. (You can also just manually copy the files inside your project directory). The file of the installation script is hidden because it is not intended to be used in the project folder in which the framework is installed.
 
-The shell script `SH/bin/_/deploy.sh` executes the deployment of the project. The first argument is either `web`, for a deployment of the `WEB` directory, or `db`, to execute the SQL files in `DB/install.txt`. The configuration parameters for the deployment can be set in the file `SH/bin/_/deployParams.sh`.
+The shell script `SH/bin/_/deploy.sh` executes the deployment of the project. The first argument is either `web`, for a deployment of the `WEB` directory, or `db`, to execute the SQL files in `DB/install.txt`. The configuration parameters for the deployment can be set in the file `SH/etc/_/deployParams.txt`.
 
 The configuration of the server side web environment is managed with the file `WEB/private/config/params.php`. If your project is in a subdirectory of the web server (as in the case of a local development environment), the project root must be specified in the constant `URI_ROOT` (e.g. `URI_ROOT = '/myProject/'`).
 
@@ -78,7 +78,7 @@ In the `WEB/public` directory, there are two subdirectories intended for the web
 The .php files that contain the back-end elaboration should go in the `pages` directory, whereas `views` is for the front-end files (e.g. .html, .css, .js).  
 Each .php file in `pages` must have a corresponding subdirectory in `views`. For example, the front-end files for the page `pages/category1/page1.php` should go in the directory `public/views/category1/page1/`.  
 
-The HTML file for the page can be retrieved by the .php file using the static method `retrieve(viewName, viewData)` of the class `\_\Navigation\View` (in the directory `private/classes/_/Navigation`), where `viewName` is the path of the .html file relative to the `views` directory, without the extension (e.g. `category1/page1/main`) and `viewData` is an array containing the dynamic content of the page. The dynamic parts of the page can be handled with placeholders and tags that are parsed by the View class.
+The HTML file for the page can be retrieved by the .php file using the static method `retrieve(viewName, viewData[, placeholderBehavior, return])` of the class `\_\Navigation\View` (in the directory `private/classes/_/Navigation`), where `viewName` is the path of the .html file relative to the `views` directory, without the extension (e.g. `category1/page1/main`) and `viewData` is an array containing the dynamic content of the page. The dynamic parts of the page can be handled with placeholders and tags that are parsed by the View class.
 
 The Javascript module `public/views/_/_common/modules/_/req.js` provides a function to retrieve a view through an asynchronous call:  
 `retrieveView(viewName, serverElabData, clientElabData)`  

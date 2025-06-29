@@ -23,7 +23,7 @@ if(empty($viewName)) {
 	} else {
 		
 		$retrieveView->setStatusCode(200);
-		$view = _NV\View::retrieve($viewName, $viewValues, true);
+		$view = _NV\View::retrieve($viewName, $viewValues, 1, true);
 		$retrieveView->setResponseData($view);
 		
 	}
