@@ -1,91 +1,124 @@
 <?php namespace _\Database;
 
+use _\Utilities as _UT;
+
 class MysqlDB {
 	
 	protected
 		$connection,
-		$connectionStatus,
+		$fConnected,
 		$connectionString,
 		$connectionUser,
 		$connectionPassword,
 		$connectionOptions
 	;
 	
-	public function __construct($pPDOConnectionString, $pUser, $pPassword, $pOptions) {
-		$this->connectionString = $pPDOConnectionString;
+	public function __construct(string $pHost, string $pDbName, string $pUser, ?string $pPassword, string $pCharSet = null, array $pOptions = []) {
+		
+		$this->connectionString = 'mysql:host=' . $pHost . ';dbname=' . $pDbName . ';charset=' . $pCharSet;
 		$this->connectionUser = $pUser;
 		$this->connectionPassword = $pPassword;
-		$this->connectionOptions = $pOptions;
+		$this->connectionOptions = $pOptions ?? [
+			\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+			\PDO::ATTR_AUTOCOMMIT => 0
+		];
+
 	}
-	
-	# Private methods
-	
-	private function connect() {
+		
+	public function connect(): bool {
 		try {
 			$this->connection = new \PDO($this->connectionString, $this->connectionUser, $this->connectionPassword, $this->connectionOptions);
-			$this->connectionStatus = 1;
-		} catch(PDOException $e) {
-			$this->connectionStatus = 0;
-			GL\Logger::writeLog('DATABASE CONNECTION', $e->getMessage());
+			$this->fConnected = true;
+		} catch(\PDOException $e) {
+			$this->fConnected = false;
+			_UT\Logger::writeLog('DATABASE CONNECTION', $e->getMessage());
 		}
+
+		return $this->fConnected;
+
 	}
 	
-	private function disconnect() {
+	public function disconnect(): bool {
+
 		$this->connection = null;
-		$this->connectionStatus = 0;
+		$this->fConnected = false;
+
+		return !$this->fConnected;
+
 	}
 	
-	private function callProcedure(string $pProcedureName, array $pParamIn, array &$pParamOut): GL\Response {
+	public function callProcedure(string $pProcedureName, array $pParamIn, array &$pParamOut): _UT\Response {
 		
 		/*
-		 * Both in and out parameters must be passed as associative arrays.
-		 * The array of the out parameters is overwritten
-		 * by the return array of the function.
+		 * Both input arguments and output parameters must be passed as associative arrays.
+		 * However, the keys of the input arguments are irrelevant (they don't have to match
+		 * the parameter names of the procedure) and the order of the arguments must
+		 * correspond to the order of the parameters declared in the procedure.
+		 * The array of the output parameters is overwritten with the returned values.
 		 */
 		
-		$response = new GL\Response([]);
-		$procedureName = $pProcedureName;
-		$response->setData(['paramIn' => $pParamIn]);
-		
-		$this->connect();
-		
-		$sqlCall = "CALL {$procedureName} (";
-		foreach($pParamIn as $paramName => $paramValue)
-			$sqlCall .= ":{$paramName}, ";
-		$sqlOutput = 'SELECT ';
-		foreach($pParamOut as $paramName => $paramValue) {
-			$sqlVar = "@{$paramName}";
-			$sqlCall .= "{$sqlVar}, ";
-			$sqlOutput .= "{$sqlVar} AS {$paramName}, ";
-		}
-		$sqlCall = substr($sqlCall, 0, -2).')';
-		$sqlOutput = substr($sqlOutput, 0, -2);
-		$preparedCall = $this->connection->prepare($sqlCall);
-		if(!$preparedCall) { # Preparation error
-			$response->setCode(1);
-		} else {
-			try {
-				$this->connection->beginTransaction();
-				$execution = $preparedCall->execute($pParamIn);
-				$output = $this->connection->query($sqlOutput);
-				$pParamOut = $output->fetch(\PDO::FETCH_ASSOC);
-				$this->connection->commit();
-				$response->setCode(0);
-			} catch (\PDOException $e) { # Error during the execution or while retrieving the output
-				$this->connection->rollBack();
-				$response->setCode(1);
-				$response->setMessage('An error occurred during the execution of the procedure: ' . $e->getMessage());
+		$response = new _UT\Response();
+
+		if($this->fConnected) {
+			
+			$procedureName = $pProcedureName;
+			$response->setData(['argsIn' => $pParamIn]);
+			
+			$sqlCall = 'CALL ' . $procedureName . '(';
+			foreach($pParamIn as $paramKey => $paramValue)
+				$sqlCall .= ':' . $paramKey . ', ';
+			$sqlOutput = 'SELECT ';
+			foreach($pParamOut as $paramKey => $paramValue) {
+				$sqlVar = '@' . $paramKey;
+				$sqlCall .= $sqlVar . ', ';
+				$sqlOutput .= $sqlVar . ' AS ' . $paramKey . ', ';
+			}
+			$sqlCall = substr($sqlCall, 0, -2).')';
+			$sqlOutput = substr($sqlOutput, 0, -2);
+			$preparedCall = $this->connection->prepare($sqlCall);
+
+			if(!$preparedCall) { # Preparation error
+				$response->setCode(2);
+			} else {
+
+				try {
+					$this->connection->beginTransaction();
+					$execution = $preparedCall->execute($pParamIn);
+					$output = $this->connection->query($sqlOutput);
+					$pParamOut = $output->fetch(\PDO::FETCH_ASSOC);
+					try {
+						$this->connection->commit();
+					} catch(\Exception $e) {
+						null;
+					}
+					$response->setCode(0);
+				} catch (\PDOException $pe) { # Error during the execution or while retrieving the output
+					try {
+						$this->connection->rollBack();
+					} catch(\Exception $e) {
+						null;
+					}
+					$response->setCode(3);
+					$response->addMessage('An error occurred during the execution of the procedure: ' . $pe->getMessage());
+				}
+				
 			}
 			
+		} else {
+			
+			$response->setCode(1);
+			$response->addMessage('Not connected');
+
 		}
 		
 		return $response;
 		
 	}
 	
-	private function query(string $pStatement, ?array $pData = [], $pFetchFormat = \PDO::FETCH_ASSOC, $pFetchOption = null): GL\Response {
+	public function query(string $pStatement, array $pData = [], $pFetchFormat = \PDO::FETCH_ASSOC, $pFetchOption = null): _UT\Response {
 		
-		$response = new GL\Response([]);
+		$response = new _UT\Response();
 		
 		if(empty($pData)) {
 			
@@ -105,6 +138,14 @@ class MysqlDB {
 		return $response;
 		
 	}
+
+	# Getters and setters
+
+	public function isConnected(): bool {
+		return $this->fConnected;
+	}
+
+	# / Getters and setters
 	
 }
 

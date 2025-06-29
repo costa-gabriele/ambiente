@@ -4,9 +4,9 @@ use _\Navigation as _NV;
 
 # Setting standard pages routes
 
-assert(_NV\Route::setAdminPage());
-assert(_NV\Route::setHomePage());
-assert(_NV\Route::setNotFoundPage());
+_NV\Route::setAdminPage();
+_NV\Route::setHomePage();
+_NV\Route::setNotFoundPage();
 
 # Common view dir
 
@@ -18,16 +18,16 @@ assert(_NV\Route::setNotFoundPage());
  */
 
 #assert(_NV\Route::addFolder([URI_ROOT . COMMON_VIEW_URI], COMMON_VIEW_DIR));
-assert(_NV\Route::addPattern(COMMON_VIEW_URI . '(.+)', realpath(COMMON_VIEW_DIR) . DIR_SEP . '$1'));
+_NV\Route::addPattern(COMMON_VIEW_URI . '(.+)', realpath(COMMON_VIEW_DIR) . DIR_SEP . '$1');
 
 # Custom pages
 
-assert(_NV\Route::addPage('_/demo'));
+_NV\Route::addPage('_/demo');
 
 # Setting web services routes
 
-assert(_NV\Route::addWebService('_/retrieveView'));
-assert(_NV\Route::addWebService('_/demo/loadFiles'));
+_NV\Route::addWebService('_/retrieveView');
+_NV\Route::addWebService('_/demo/loadFiles');
 
 $fSaved = _NV\Route::save();
 

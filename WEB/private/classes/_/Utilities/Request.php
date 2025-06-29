@@ -9,7 +9,7 @@ class Request implements \JsonSerializable  {
 		$files
 	;
 	
-	public function __construct (RequestFormat $pRequestFormat) {
+	public function __construct (RequestFormat $pRequestFormat = RequestFormat::JSON) {
 		
 		$this->format = $pRequestFormat;
 
@@ -62,6 +62,10 @@ class Request implements \JsonSerializable  {
 	
 	# Getters and setters
 	
+	public function getFormat(): RequestFormat {
+		return $this->format;
+	}
+	
 	public function getData(): array {
 		return $this->data;
 	}
@@ -74,6 +78,11 @@ class Request implements \JsonSerializable  {
 		return json_encode($this) ?? null;
 	}
 	
+	public function setFormat(RequestFormat $pFormat): bool {
+		$this->format = $pFormat;
+		return true;
+	}
+
 	public function setData(array $pData): bool {
 		$this->data = $pData;
 		return true;

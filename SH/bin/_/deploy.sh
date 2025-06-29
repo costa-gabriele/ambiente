@@ -3,13 +3,15 @@
 P_DEPLOYMENT_TYPE=${1}
 fileDir=$(dirname "${0}")
 excludeFile=$(realpath "${fileDir}/../../etc/_/webDeployIgnore.txt")
+paramFile=$(realpath "${fileDir}/../../etc/_/deployParams.txt")
 
 separator="########"
 
 echo ""
 echo "${separator}"
 echo "Loading parameters..."
-. ./deployParams.sh
+. ${paramFile}
+
 if [ ${?} -eq 0 ]
 then
 	echo "Ok"
@@ -34,7 +36,7 @@ then
 
 	if [ "${WEB_REPOSITORY_SERVER}" = "localhost" ]
 	then
-		rsync -av --exclude-from="${excludeFile}" "${WEB_REPOSITORY_DIR}/". "${WEB_DEPLOYMENT_DIR}"
+		rsync -av --exclude-from="${excludeFile}" "${WEB_REPOSITORY_DIR}/". "${WEB_DEPLOYMENT_DIR}" --delete
 	else
 		echo "sftp"
 	fi
@@ -62,13 +64,18 @@ then
 
 	nFiles=0
 	installationFile="${DB_DEPLOYMENT_DIR}/install.txt"
+	if [ -f "${installationFile}" ]
+	then
+		rm "${installationFile}"
+	fi
+	
 	cat "${DB_INSTALLATION_FILE}" | while read path || [ -n "${path}" ]
 	do
 		sourceFile="${DB_REPOSITORY_DIR}/${path}"
 		nFiles=$(expr ${nFiles} + 1)
 		if [ "${DB_REPOSITORY_SERVER}" = "localhost" ]
 		then
-			fileName="${nFiles}.sql"
+			fileName=$(basename "${path}")
 			cp "${sourceFile}" "${DB_DEPLOYMENT_DIR}/${fileName}"
 			printf "source ${fileName}\n" >> "${installationFile}"
 		else
@@ -76,6 +83,9 @@ then
 			exit 1
 		fi
 	done
+
+	cd "${DB_DEPLOYMENT_DIR}"
+	eval $DB_CONNECTION < "${installationFile}"
 
 	outcome=${?}
 
@@ -85,9 +95,6 @@ then
 	else
 		echo "Error."
 	fi
-
-	cd "${DB_DEPLOYMENT_DIR}"
-	eval $DB_CONNECTION < "${installationFile}"
 
 fi
 

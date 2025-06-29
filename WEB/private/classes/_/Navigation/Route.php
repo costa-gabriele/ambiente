@@ -186,9 +186,13 @@ class Route {
 	public static function addPage(string $pPageName, array $pRequestURIs = []): bool {
 		
 		$requestURIs =
-			(empty($pRequestURIs)) ?
-			[PAGE_URI_ROOT . $pPageName . '/'] :
-			array_map(function($requestURI) {return PAGE_URI_ROOT . $requestURI;}, $pRequestURIs)
+			(empty($pRequestURIs)) ? [PAGE_URI_ROOT . $pPageName . '/'] :
+			array_map (
+				function($pRequestURI) {
+					return PAGE_URI_ROOT . $pRequestURI . (($pRequestURI && substr($pRequestURI, -1) != '/') ? '/' : '');
+				},
+				$pRequestURIs
+			)
 		;
 		
 		$viewDir = VIEW_DIR . str_replace('/', DIR_SEP, $pPageName) . DIR_SEP;
@@ -198,7 +202,10 @@ class Route {
 		
 		# Finally the page route is added
 		return self::add (
-			$requestURIs,
+			array_merge (
+				$requestURIs,
+				array_map(function($pRequestURI) {return substr($pRequestURI, 0, -1);}, $requestURIs) # Allow URI with or without trailing slash
+			),
 			[
 				'path' => PAGE_DIR . str_replace('/', DIR_SEP, $pPageName) . '.' . PAGE_EXTENSION,
 				'type' => self::PAGE_TYPE,
@@ -231,7 +238,7 @@ class Route {
 		return self::addPage($pAdminPageName, $pAdminPageURIs);
 	}
 
-	public static function setHomePage(string $pHomePageName = HOME_PAGE_NAME, array $pHomePageURIs = [HOME_PAGE_URI, '']): bool {
+	public static function setHomePage(string $pHomePageName = HOME_PAGE_NAME, array $pHomePageURIs = ['', HOME_PAGE_URI]): bool {
 		return self::addPage($pHomePageName, $pHomePageURIs);
 	}
 	

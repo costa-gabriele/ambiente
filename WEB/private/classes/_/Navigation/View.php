@@ -4,9 +4,9 @@ class View {
 	
 	private static $viewSyntax = [
 		'tagPattern' => ['l' => '<!--\s*\{\{', 'r' => '\}\}\s*-->'],
-		'placeholderPattern' => ['l' => '\{\{', 'r' => '\}\}', 'name' => '[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*'],
+		'placeholderPattern' => ['l' => '\{\{', 'r' => '\}\}', 'name' => '%?[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*'],
 		'subLabelSeparator' => '.',
-		'instancePattern' => ['l' => '\[', 'r' => '\]', 'key' => '#', 'value' => '@'],
+		'instancePattern' => ['l' => '%', 'r' => '', 'key' => '#', 'value' => '@'],
 		'argumentPattern' => '\([a-zA-Z0-9_\/]+\)',
 		'tagOpening' => ':',
 		'tagClosing' => ';'
@@ -27,7 +27,7 @@ class View {
 			$viewFileString :
 			self::parseTag($viewFileString, $viewTag['str'], $viewTag['pos'])['content']
 		;
-
+		
 		self::resolveSubViewTags($viewString, $pViewValues);
 		self::resolveLoopTags($viewString, $pViewValues);
 		self::resolveAbsolutePathTags($viewString, dirname($viewPath));
@@ -129,15 +129,19 @@ class View {
 
 		preg_match_all($pattern, $pViewString, $matched, PREG_OFFSET_CAPTURE);
 		
-		return array_map (
-			function($pMatchData) {
-				return [
-					'str' => $pMatchData[0],
-					'pos' => $pMatchData[1]
-				];
-			},
-			$matched[0]
-		);
+		if(!empty($matched[0])) {
+			return array_map (
+				function($pMatchData) {
+					return [
+						'str' => $pMatchData[0],
+						'pos' => $pMatchData[1]
+					];
+				},
+				$matched[0]
+			);
+		} else {
+			return [];
+		}
 		
 	}
 	
@@ -190,15 +194,15 @@ class View {
 			case 0: # From matched label to values
 
 				$pattern = self::$viewSyntax['placeholderPattern']['name'];
-					
 				$placeholders = self::find($pattern, $pViewString);
 				
 				foreach($placeholders as $placeholder) {
 					
 					$placeholder = $placeholder['str'];
 					$label = str_replace(['{', '}'], ['', ''], $placeholder);
+					
 					foreach(explode(self::$viewSyntax['subLabelSeparator'], $label) as $key) {
-						$value = $value[$key] ?? $pValues[$key] ?? [];
+						$value = $value[$key] ?? $pValues[$key] ?? '';
 					}
 					if(!is_array($value)) {
 						$pViewString = str_replace(self::composePlaceholder($label, false), $value, $pViewString);
@@ -216,6 +220,7 @@ class View {
 					}
 					
 				}
+				
 				break;
 			
 		}
@@ -257,13 +262,13 @@ class View {
 			
 			$tagData = self::parseTag($pViewString, $absolutePathTag['str'], $absolutePathTag['pos'] + $offset);
 			
-			preg_match('/(href|src)=("|\')(.+)("|\')/', $tagData['content'], $match, PREG_OFFSET_CAPTURE);
+			preg_match('/(href|src)=("|\')([a-zA-Z0-9_\-\.\/]+)("|\')/', $tagData['content'], $match, PREG_OFFSET_CAPTURE);
 			if(empty($match[3]))
 				continue;
 			
 			$relPathStr = $match[3][0];
 			$relPathPos = $match[3][1];
-
+			
 			$viewURI = str_replace(DIR_SEP, '/', str_replace(realpath(VIEW_DIR) . DIR_SEP, PAGE_URI_ROOT, $pViewDir)) . '/';
 			$absolutePathString = $viewURI . $relPathStr;
 			$newTag = substr($tagData['content'], 0, $relPathPos) . $absolutePathString . substr($tagData['content'], $relPathPos + strlen($relPathStr));
@@ -315,7 +320,6 @@ class View {
 			$contentInstance = $content;
 			$placeholderValue = [$instanceKeyPlaceholder => $foreachKey];
 			self::resolvePlaceholders($contentInstance, $placeholderValue, 1);
-			$repeatedString .= $contentInstance;
 			
 			/*
 			 * Substitution of the value
@@ -327,14 +331,17 @@ class View {
 			 * keys are translated into the instance syntax of the view tag.
 			 */
 			if(is_array($foreachValue)) {
+				$placeholderValues = [];
 				foreach($foreachValue as $k => $v) {
 					$placeholderValues[self::$viewSyntax['instancePattern']['l'] . $k . self::$viewSyntax['instancePattern']['r']] = $v;
 				}
 			} else {
 				$placeholderValues = [$instanceValuePlaceholder => $foreachValue];
 			}
-			self::resolvePlaceholders($repeatedString, $placeholderValues, 1);
+			self::resolvePlaceholders($contentInstance, $placeholderValues, 1);
 			
+			$repeatedString .= $contentInstance;
+
 		}
 
 		$pViewString = substr($pViewString, 0, $pTagData['tagStart']) . $repeatedString . substr($pViewString, $pTagData['closingTagEnd']);

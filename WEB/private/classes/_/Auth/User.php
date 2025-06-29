@@ -17,12 +17,12 @@ class User {
 	public static function getName(): string {
 		return $this->name;
 	}
-
+	
 	public function setName(string $pName): bool {
 		$this->name = $pName;
 		return true;
 	}
-
+	
 	# / Getters and setters
 
 }

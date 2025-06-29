@@ -1,5 +1,7 @@
 <?php
 
+require_once('init.php');
+
 /*
  * This file is intended to contain custom
  * processing to be performed for each web service request.

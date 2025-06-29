@@ -23,20 +23,17 @@ class WebService {
 		$request,
 		$response,
 		$uriData = [],
-		$requestFormat,
-		$responseFormat,
 		$statusCode,
 		$headers = []
 	;
 	
-	public function __construct(_UT\RequestFormat $pRequestFormat, _UT\ResponseFormat $pResponseFormat) {
+	public function __construct(_UT\RequestFormat|_UT\Request $pRequest, _UT\ResponseFormat|_UT\Response $pResponse) {
 		
-		$this->requestFormat = $pRequestFormat;
-		$this->responseFormat = $pResponseFormat;
-		$this->request = new _UT\Request($pRequestFormat);
-		$this->response = new _UT\Response($pResponseFormat);
+		$this->request = ($pRequest instanceof _UT\RequestFormat) ? new _UT\Request($pRequest) : $pRequest;
+		$this->response = ($pResponse instanceof _UT\ResponseFormat) ? new _UT\Response($pResponse) : $pResponse;
 
-		switch($this->responseFormat) {
+
+		switch($this->response->getFormat()) {
 
 			case self::JSON_RESPONSE:
 				$this->addHeader('Content-Type', 'application/json');
@@ -59,8 +56,16 @@ class WebService {
 		return $this->request;
 	}
 
+	public function getResponse(): _UT\Response {
+		return $this->response;
+	}
+
 	public function getRequestData(): array {
 		return $this->request->getData();
+	}
+
+	public function getResponseData(): array {
+		return $this->response->getData();
 	}
 
 	public function getRequestFiles(): array {
@@ -102,7 +107,20 @@ class WebService {
 	}
 	
 	public function setResponseData(array|string $pResponseData): bool {
-		$this->response->setData((is_array($pResponseData)) ? $pResponseData : [$pResponseData]);
+		return $this->response->setData((is_array($pResponseData)) ? $pResponseData : [$pResponseData]);
+	}
+
+	public function addResponseData($pResponseData): bool {
+		return $this->response->addData($pResponseData);
+	}
+
+	public function setResponseCode(int $pResponseCode): bool {
+		$this->response->setCode($pCode);
+		return true;
+	}
+	
+	public function addResponseMessage(string $pResponseMessage): bool {
+		$this->response->addMessage($pResponseMessage);
 		return true;
 	}
 

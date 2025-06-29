@@ -15,7 +15,7 @@ const VIEW_EXTENSION = 'html';
 
 const URI_ROOT = '/';
 const PAGE_URI_ROOT = URI_ROOT;
-const WS_URI_ROOT = URI_ROOT . 'ws/';
+const WS_URI_ROOT = URI_ROOT . 'api/v1/';
 const COMMON_VIEW_URI = BASE_DIR_NAME . '/_common/';
 const ADMIN_PAGE_URI = BASE_DIR_NAME . '/admin/';
 const HOME_PAGE_URI = 'home/';
@@ -30,9 +30,10 @@ const CONFIG_DIR = __DIR__ . DIR_SEP;
 const PRIVATE_DIR = CONFIG_DIR . '..' . DIR_SEP;
 const ADMIN_DIR = PRIVATE_DIR . 'admin' . DIR_SEP;
 const CLASSES_DIR = PRIVATE_DIR . 'classes' . DIR_SEP;
+const LOG_DIR = PRIVATE_DIR . 'log' . DIR_SEP;
+const UPLOADED_FILES_DIR = PRIVATE_DIR . 'files' . DIR_SEP;
 const ROUTES_CACHE_PATH = ADMIN_DIR . 'routes.ser';
 const ROUTES_INIT_PATH = ADMIN_DIR . 'initRoutes.php';
-const UPLOADED_FILES_DIR = PRIVATE_DIR . 'files' . DIR_SEP;
 
 # Public directories
 
@@ -47,5 +48,14 @@ const COMMON_VIEW_DIR = VIEW_DIR . BASE_DIR_NAME . DIR_SEP . '_common' . DIR_SEP
 const SESSION_ARRAY_KEY = 'session';
 const DEFAULT_SESSION_NAME = 'session';
 const DEFAULT_SESSION_LIFETIME = 60 * 60 * 12;
+
+# DB connection
+
+const DBMS = 'MYSQL';
+const DB_HOST = 'localhost';
+const DB_SCHEMA = 'schema';
+const DB_USER = 'root';
+const DB_PASSWORD = '';
+const DB_ENCODING = 'utf8mb4';
 
 ?>

@@ -9,7 +9,7 @@ class Response implements \JsonSerializable {
 		$data
 	;
 	
-	public function __construct (ResponseFormat $pResponseFormat, array $pResponse = []) {
+	public function __construct (ResponseFormat $pResponseFormat = ResponseFormat::JSON, array $pResponse = []) {
 		
 		$this->format = $pResponseFormat;
 
@@ -40,11 +40,15 @@ class Response implements \JsonSerializable {
 	
 	# Getters and setters
 	
+	public function getFormat(): ResponseFormat {
+		return $this->format;
+	}
+
 	public function getCode(): int {
 		return $this->code;
 	}
 	
-	public function getMessages(): ?array {
+	public function getMessages(): array {
 		return $this->messages;
 	}
 	
@@ -82,6 +86,11 @@ class Response implements \JsonSerializable {
 
 	}
 
+	public function setFormat(ResponseFormat $pFormat): bool {
+		$this->format = $pFormat;
+		return true;
+	}
+
 	public function setCode(int $pCode): bool {
 		$this->code = $pCode;
 		return true;
@@ -103,8 +112,14 @@ class Response implements \JsonSerializable {
 		return true;
 	}
 	
-	public function addData(array $pData): bool {
-		$this->data = array_merge($this->data, $pData);
+	public function addData($pData): bool {
+		if(is_array($pData)) {
+			$this->data = array_merge($this->data ?? [], $pData);
+		} elseif(is_object($pData) && in_array('JsonSerializable', class_implements($pData))) {
+			$this->data = array_merge($this->data ?? [], json_decode(json_encode($pData), true));
+		} else {
+			$this->data[] = $pData;
+		}
 		return true;
 	}
 	

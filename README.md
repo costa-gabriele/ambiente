@@ -7,45 +7,62 @@ In particular, it simplifies route management and the dynamic rendering of HTML 
 
 ## Directory structure
 
-#### DB
-- _install.txt_
-#### SH
-- `bin`
-   - `_`
-      - _.install.sh_
-      - _deploy.sh_
-      - _deployParams.sh_
-- `etc`
-  - `_`
-    - _installIgnore.txt_
-#### WEB
-- `private`
-  - `admin`
-    - _initRoutes.php_
-    - _router.php_
-  - `classes`
-    - `_`
-      - `Auth`
-      - `Database`
-      - `Files`
-      - `Navigation`
-      - `Network`
-      - `Utilities`
-  - `config`
-    - _autoloader.php_
-    - _custom.php_
-    - _params.php_
-    - _polyfill.php_
-  - _facade.php_
-- `public`
-  - `pages`
-  - `views`
-    - `_`
-      - `_common`
-        - `modules`
-        - `style`
-  - `ws`
-- _.htaccess_
+```
+ambiente/
+│
+├─ DB/
+│  └─ install.txt
+├─ SH/
+│  ├─ bin/
+│  │  └─ _/
+│  │     ├─ .install.sh
+│  │     └─ deploy.sh
+│  └─ etc/
+│     └─ _/
+│        ├─ .installIgnore.txt
+│        ├─ deployParams.txt
+│        └─ webDeployIgnore.txt
+└─ WEB
+   ├─ .htaccess
+   ├─ private/
+   │  ├─ facade.php
+   │  ├─ admin/
+   │  │  ├─ initRoutes.php
+   │  │  └─ router.php
+   │  ├─ classes/
+   │  │  └─ _/
+   │  │     ├─ Auth/
+   │  │     ├─ Database/
+   │  │     ├─ Files/
+   │  │     ├─ Navigation/
+   │  │     ├─ Network/
+   │  │     └─ Utilities/
+   │  ├─ config/
+   │  │  ├─ autoloader.php
+   │  │  ├─ init.php
+   │  │  ├─ initPage.php
+   │  │  ├─ initWebService.php
+   │  │  ├─ params.php
+   │  │  └─ polyfill.php
+   │  ├─ files/
+   │  └─ log/
+   └─ public/
+      ├─ pages/
+      │  └─ _/
+      │     ├─ admin.php
+      │     └─ demo.php
+      ├─ views/
+      │  └─ _/
+      │     ├─ _common/
+      │     │  ├─ modules/
+      │     │  └─ style/
+      │     ├─ admin/
+      │     └─ demo/
+      └─ ws/
+         └─ _/
+            ├─ retrieveView.php
+            └─ demo/
+```
 
 ## Installation, deployment, and configuration
 The shell script `SH/bin/_/.install.sh` installs the framework in the directory provided as the first argument. The second argument is either `i` for an initial, complete installation, or `u`, to update an existing installation. (You can also just manually copy the files inside your project directory). The file of the installation script is hidden because it is not intended to be used in the project folder in which the framework is installed.
@@ -86,13 +103,13 @@ This tag encloses an HTML tag that has a `href` or `src` attribute, and transfor
 
 `<!--{{FOREACH(content):}}-->` / `<!--{{FOREACH(content);}}-->`  
 Repeats the HTML that it encloses for each element of the array indicated by the argument.  
-Inside the loop, the placeholder `{{[#]}}` stands for the current key of the array. If the array contains simple values, the current value is indicated by `{{[@]}}`; if the value is itself an array, the value is indicated by the name of the key instead of the at sign.
+Inside the loop, the placeholder `{{%#}}` stands for the current key of the array. If the array contains simple values, the current value is indicated by `{{%@}}`; if the value is itself an array, the value is indicated by the name of the key instead of the at sign.
 
-### Note
-
-A demo of these functionalities can be found in the page `_/demo`.
-
-Notice that the syntax of both placeholders and tags is intended to maintain a valid HTML document. An .html file that contains placholders and tags can be opened with a web browser to see a preview of the page; the tags are ignored since they are inside comments, and placeholders will be showed literally.
+> [!NOTE]
+>
+> A demo of these functionalities can be found in the page `_/demo`.
+> 
+> Notice that the syntax of both placeholders and tags is intended to maintain a valid HTML document. An .html file that contains placholders and tags can be opened with a web browser to see a preview of the page; the tags are ignored since they are inside comments, and placeholders will be showed literally.
 
 ## Routes
 
@@ -112,7 +129,7 @@ Creates a route for all the URIs contained in the array passed as the first argu
 Creates a route for a page. The name of the page, to be passed as the first argument, is the path relative to `public/pages/`, without any file extension. The second argument is optional, and it's an array of the URIs that are to be mapped to the page; if it's not provided, the default URI is used, which is the page name appended to the URI root for page requests, defined by the global constant PAGE_URI_ROOT in `private/config/params`. The default root is the base URL of the website. So for example, to set up a route for the page `www.site.org/about/`, the command would be `Route::addPage('about')`. This maps the URI to the file `public/pages/about.php` and also sets up routes for the files in `public/views/about`. Notice that routes will be created only for the files that are in the view folder at the moment of the execution of the command, and if a file is later added, its route has to be added with `Route::add()`;
 
 - `addWebService(webServiceName, requestURIs)`  
-Creates a route for a web service. The name of the web service, to be passed as the first argument, is the path relative to `public/ws/`, without any file extension. The second argument is optional, and it's an array of the URIs that are to be mapped to the page; if it's not provided, the default URI is used, which is the web service name appended to the URI root for web service requests, defined by the global constant WS_URI_ROOT in `private/config/params`. The default root is obtained appending `ws` to the base URL of the website. So for example, to set up a route for the web service `www.site.org/web-service`, the command would be `Route::addWebService('web-service')`. This maps the URI to the file `public/ws/web-service.php`.
+Creates a route for a web service. The name of the web service, to be passed as the first argument, is the path relative to `public/ws/`, without any file extension. The second argument is optional, and it's an array of the URIs that are to be mapped to the page; if it's not provided, the default URI is used, which is the web service name appended to the URI root for web service requests, defined by the global constant WS_URI_ROOT in `private/config/params`. The default root is obtained appending `api/v1/` to the base URL of the website. So for example, to set up a route for the web service `www.site.org/api/v1/web-service`, the command would be `Route::addWebService('web-service')`. This maps the URI to the file `public/ws/web-service.php`.
 
 - `addPattern(requestURIPattern, destinationPath)`  
 Creates a rule that maps all the requests that match the pattern provided as the first argument, to the path provided as the second argument. Regular expressions group captures can be used in defining these rules: for example, `Route::addPattern('ruleDir/' . '(.+)', 'ruleDir/route/' . '$1')` would map `www.site.org/ruleDir/test` to  `www.site.org/ruleDir/route/test`.
