@@ -92,11 +92,13 @@ function fillView(pViewTemplate, pViewData, pPrefix = "") {
 	
 }
 
-async function retrieveView(pViewName, pServerElabData = {}, pClientElabData = {}) {
+async function retrieveView(pViewName, pServerElabData = {}, pClientElabData = {}, pValuesRetriever = "", pRetrieverData = {}) {
 		
 	let viewData = {
 		"viewName": pViewName,
-		"viewValues": pServerElabData
+		"viewValues": pServerElabData,
+		"valuesRetriever": pValuesRetriever,
+		"retrieverData": pRetrieverData
 	};
 	
 	return callLocalWebService (

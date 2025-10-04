@@ -67,9 +67,9 @@ class ServerSentEvent {
 
 	# Override this method to produce your output
     protected function output() {
-        $this->writeEvent('test2', (new \DateTime())->format('d/m/Y H:i:s'));
+        $this->writeEvent('test', (new \DateTime())->format('d/m/Y H:i:s'));
     }
-
+    
     # Getters and setters
 
 	public function getHeaders(): array {

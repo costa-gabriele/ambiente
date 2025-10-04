@@ -11,11 +11,12 @@ class View {
 		'placeholderPattern' => ['l' => '\{\{', 'r' => '\}\}', 'name' => '%?[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*'],
 		'subLabelSeparator' => '.',
 		'instancePattern' => ['l' => '%', 'r' => '', 'key' => '#', 'value' => '@'],
-		'argumentPattern' => '\([a-zA-Z0-9_\/]+\)',
+		'argumentPattern' => '\(%?[a-zA-Z0-9_\/]+(\.[a-zA-Z0-9]+)*\)',
 		'tagOpening' => ':',
 		'tagClosing' => ';'
 	];
 	private static $viewTagName = 'VIEW';
+	private static $ifTagName = 'IF';
 	private static $foreachTagName = 'FOREACH';
 	private static $absolutePathTagName = 'ABS';
 
@@ -32,10 +33,8 @@ class View {
 			self::parseTag($viewFileString, $viewTag['str'], $viewTag['pos'])['content']
 		;
 		
-		self::resolveSubViewTags($viewString, $pViewValues, $fpPlaceholderBehavior);
-		self::resolveLoopTags($viewString, $pViewValues);
 		self::resolveAbsolutePathTags($viewString, dirname($viewPath));
-		self::resolvePlaceholders($viewString, $pViewValues, $fpPlaceholderBehavior);
+		self::interpret($viewString, $pViewValues, $fpPlaceholderBehavior);
 
 		if($pfReturn) {
 			return $viewString;
@@ -44,6 +43,15 @@ class View {
 			return true;
 		}
 		
+	}
+
+	private static function interpret(&$pViewString, $pViewValues, $fpPlaceholderBehavior): void {
+		
+		self::resolveLoopTags($pViewString, $pViewValues);
+		self::resolveIfTags($pViewString, $pViewValues);
+		self::resolveSubViewTags($pViewString, $pViewValues, $fpPlaceholderBehavior);
+		self::resolvePlaceholders($pViewString, $pViewValues, $fpPlaceholderBehavior);
+
 	}
 
 	private static function composeTag(string $pSignature): string {
@@ -88,6 +96,15 @@ class View {
 		];
 
 		return preg_replace(array_keys($replace), array_values($replace), $pHTMLString);
+	}
+
+	private static function labelValue(string $pLabel, $pValues = []): string|array|null {
+		foreach(explode(self::$viewSyntax['subLabelSeparator'], $pLabel) as $i => $key) {
+			$value = ($i == 0) ? ($pValues[$key] ?? null) : (isset($value[$key]) ? $value[$key] : null);
+			if(is_null($value))
+				break;
+		}
+		return $value;
 	}
 
 	private static function find(string $pElement, string $pViewString, int $pType = 0, bool $pfArguments = false): ?array {
@@ -198,6 +215,7 @@ class View {
 			# From matched label to values
 			case self::REMOVE_UNMATCHED_PLACEHOLDERS: # Removes unmatched placeholders
 			case self::LEAVE_UNMATCHED_PLACEHOLDERS: # Leaves unmatched placeholders as they are (to be used for subsequent client-side processing)
+				
 				$pattern = self::$viewSyntax['placeholderPattern']['name'];
 				$placeholders = self::find($pattern, $pViewString);
 				
@@ -206,14 +224,14 @@ class View {
 					$placeholder = $placeholder['str'];
 					$label = str_replace(['{', '}'], ['', ''], $placeholder);
 					
-					foreach(explode(self::$viewSyntax['subLabelSeparator'], $label) as $key) {
-						$value = $value[$key] ?? $pValues[$key] ?? null;
-					}
+					$value = self::labelValue($label, $pValues);
+					
 					if(!is_array($value) && ($pMode == 0 || !is_null($value))) {
 						$pViewString = str_replace(self::composePlaceholder($label, false), $value, $pViewString);
 					}
 					
 				}
+				
 				break;
 			
 			# From values to placeholders
@@ -288,6 +306,32 @@ class View {
 
 	}
 
+	private static function resolveIfTags(string &$pViewString, array $pValues): bool {
+
+		$ifTags = self::find(self::$ifTagName, $pViewString, 2, true);
+		$offset = 0;
+
+		foreach($ifTags as $ifTag) {
+			
+			$tagData = self::parseTag($pViewString, $ifTag['str'], $ifTag['pos'] + $offset);
+			$valueKey = $tagData['argument'];
+			$ifValue = self::labelValue($valueKey, $pValues);
+			$content = ($ifValue) ? $tagData['content'] : '';
+
+			$pViewString =
+				substr($pViewString, 0, $tagData['tagStart']) .
+				$content .
+				substr($pViewString, $tagData['closingTagEnd'])
+			;
+			$offsetAdjustment = - (strlen($tagData['content']) - strlen($content)) - (($tagData['tagLength']) * 2);
+			$offset += $offsetAdjustment;
+			
+		}
+
+		return true;
+
+	}
+
 	private static function resolveLoopTags(string &$pViewString, array $pValues): bool {
 
 		$foreachTags = self::find(self::$foreachTagName, $pViewString, 2, true);
@@ -297,7 +341,7 @@ class View {
 			
 			$tagData = self::parseTag($pViewString, $foreachTag['str'], $foreachTag['pos'] + $offset);
 			$valueKey = $tagData['argument'];
-			$foreachValues = $pValues[$valueKey] ?? [];
+			$foreachValues = self::labelValue($valueKey, $pValues) ?? [];
 			
 			self::expandLoopTag($tagData, $foreachValues, $pViewString, $offset);
 			
@@ -344,7 +388,12 @@ class View {
 			} else {
 				$placeholderValues = [$instanceValuePlaceholder => $foreachValue];
 			}
+			
+			self::interpret($contentInstance, $placeholderValues, self::FROM_VALUES_TO_PLACEHOLDERS);
+			/*
+			self::resolveIfTags($contentInstance, $placeholderValues);
 			self::resolvePlaceholders($contentInstance, $placeholderValues, self::FROM_VALUES_TO_PLACEHOLDERS);
+			*/
 			
 			$repeatedString .= $contentInstance;
 

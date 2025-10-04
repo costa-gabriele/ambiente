@@ -7,6 +7,7 @@ $retrieveView = new _NW\WebService(_NW\WebService::JSON_REQUEST, _NW\WebService:
 $requestData = $retrieveView->getRequestData();
 $viewName = $requestData['viewName'] ?? null;
 $viewValues = $requestData['viewValues'] ?? [];
+$valuesRetrieverName = $requestData['valuesRetriever'] ?? null;
 
 if(empty($viewName)) {
 	
@@ -22,6 +23,14 @@ if(empty($viewName)) {
 		
 	} else {
 		
+		$valuesRetrieverPath = __DIR__ . DIR_SEP . 'viewValuesRetrievers' . DIR_SEP . $valuesRetrieverName . '.php';
+		if(!empty($valuesRetrieverName) && file_exists($valuesRetrieverPath)) {
+			require $valuesRetrieverPath;
+			$valuesRetriever = new $valuesRetrieverName($retrieveView->getRequest());
+			$retrievedValues = $valuesRetriever->retrieve();
+			$viewValues = !empty($retrievedValues) ? $retrievedValues : $viewValues;
+		}
+
 		$retrieveView->setStatusCode(200);
 		$view = _NV\View::retrieve($viewName, $viewValues, 1, true);
 		$retrieveView->setResponseData($view);

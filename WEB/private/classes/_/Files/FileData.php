@@ -12,25 +12,25 @@ class FileData {
 	
 	public function __construct(array $pFileData) {
 		
-		$this->name = $pFileData['name'] ?? '';
-		$this->path = $pFileData['path'] ?? '';
+		$this->name = $pFileData['name'] ?? null;
+		$this->path = $pFileData['path'] ?? null;
 		$this->size = $pFileData['size'] ?? null;
-		$this->type = $pFileData['type'] ?? '';
+		$this->type = $pFileData['type'] ?? null;
 		$this->error = $pFileData['error'] ?? null;
 
 	}
 
 	# Getters and setters
 	
-	public function getName(): string {
+	public function getName(): ?string {
 		return $this->name;
 	}
 	
-	public function getPath(): string {
+	public function getPath(): ?string {
 		return $this->path;
 	}
 	
-	public function getSize(): int {
+	public function getSize(): ?int {
 		return $this->size;
 	}
 

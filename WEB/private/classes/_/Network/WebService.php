@@ -115,7 +115,7 @@ class WebService {
 	}
 
 	public function setResponseCode(int $pResponseCode): bool {
-		$this->response->setCode($pCode);
+		$this->response->setCode($pResponseCode);
 		return true;
 	}
 	

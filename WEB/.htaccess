@@ -4,7 +4,7 @@
 	
 	RewriteEngine on
 	
-	RewriteRule private/admin/router.php - [L]
-	RewriteRule ^(.*)$ private/admin/router.php
+	RewriteRule private/config/router.php - [L]
+	RewriteRule ^(.*)$ private/config/router.php
 	
 </IfModule>

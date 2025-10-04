@@ -51,7 +51,7 @@ abstract class AbstractSession {
 		return $_SESSION[SESSION_ARRAY_KEY][$pKey] ?? null;
 	}
 	
-	protected static function isNew(): bool {
+	public static function isNew(): bool {
 		return self::$fNew;
 	}
 

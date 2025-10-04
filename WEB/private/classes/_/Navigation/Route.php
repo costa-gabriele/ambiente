@@ -38,17 +38,28 @@ class Route {
 		
 	}
 	
-	public static function resolve(string $pURI): array {
+	public static function resolve(string $pUri): array {
 		
-		$uri = $pURI;
+		$uriParts = explode('?', $pUri);
+		$uri = $uriParts[0];
 
+		/* Useless: $_GET is available
+		$queryString = $uriParts[1] ?? '';
+		$queryStringArray = [];
+		foreach(explode("&", $queryString) as $kv) {
+			$kva = explode("=", $kv);
+			if(count($kva) == 2)
+				$queryStringArray[$kva[0]] = $kva[1];
+		}
+		*/
+		
 		$destination = [
 			'info' => null,
 			'input' => []
 		];
-		
+
 		if(self::load()) {
-			
+
 			if(!empty(self::$routes['exactURIs'][$uri]))
 				$destination['info'] = self::$routes['exactURIs'][$uri];
 			else {
@@ -186,12 +197,14 @@ class Route {
 	public static function addPage(string $pPageName, array $pRequestURIs = []): bool {
 		
 		$requestURIs =
-			(empty($pRequestURIs)) ? [PAGE_URI_ROOT . $pPageName . '/'] :
-			array_map (
-				function($pRequestURI) {
-					return PAGE_URI_ROOT . $pRequestURI . (($pRequestURI && substr($pRequestURI, -1) != '/') ? '/' : '');
-				},
-				$pRequestURIs
+			array_merge (
+				[PAGE_URI_ROOT . $pPageName . '/'],
+				array_map (
+					function($pRequestURI) {
+						return PAGE_URI_ROOT . $pRequestURI . (($pRequestURI && substr($pRequestURI, -1) != '/') ? '/' : '');
+					},
+					$pRequestURIs
+				)
 			)
 		;
 		

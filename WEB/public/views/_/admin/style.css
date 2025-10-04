@@ -1,27 +1,28 @@
-@import url("../_common/style/commonStyle.css");
-
 html {
-    --light-grey-background: #fafafa;
-    --dark-grey-border: #444;
-    font-family: Arial;
+
+	--light-grey-background: #fafafa;
+	--dark-grey-border: #404040;
+
+	font-family: Arial;
+
 }
 
 #cont {
-    padding: 0 10%;
+	padding: 0 4%;
 }
 
 table, tr, td, th {
-    border: thin solid var(--dark-grey-border);
-    border-collapse: collapse;
-    text-align: left;
-    font-family: Monospace;
+	border: thin solid var(--dark-grey-border);
+	border-collapse: collapse;
+	text-align: left;
+	font-family: Monospace;
 }
 
 td, th {
-    padding: 0.4em;
+	padding: 0.4em;
 }
 
 th {
-    background: var(--light-grey-background);
-    font-weight: 600;
+	background: var(--light-grey-background);
+	font-weight: 600;
 }

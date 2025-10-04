@@ -26,9 +26,6 @@ ambiente/
    ├─ .htaccess
    ├─ private/
    │  ├─ facade.php
-   │  ├─ admin/
-   │  │  ├─ initRoutes.php
-   │  │  └─ router.php
    │  ├─ classes/
    │  │  └─ _/
    │  │     ├─ Auth/
@@ -43,7 +40,9 @@ ambiente/
    │  │  ├─ initPage.php
    │  │  ├─ initWebService.php
    │  │  ├─ params.php
-   │  │  └─ polyfill.php
+   │  │  ├─ polyfill.php
+   │  │  ├─ router.php
+   │  │  └─ setRoutes.php
    │  ├─ files/
    │  └─ log/
    └─ public/
@@ -61,7 +60,8 @@ ambiente/
       └─ ws/
          └─ _/
             ├─ retrieveView.php
-            └─ demo/
+            ├─ demo/
+            └─ viewValuesRetrievers/
 ```
 
 ## Installation, deployment, and configuration
@@ -147,3 +147,6 @@ The page `_/admin` shows all the existing routes.
 
 ### Web services
 The class `_\Network\WebService` provides useful methods to create a web service controller. See for example the demo webservice `public/ws/_/demo/loadFiles.php`.
+
+### Websocket server
+The class `_\Network\WebSocketServer` can be used to easily run a websocket server.

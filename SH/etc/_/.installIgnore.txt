@@ -1,7 +1,6 @@
 README.md
-SH/etc/_/deployParams.txt
+SH/etc/_/*
 WEB/private/config/*
-WEB/private/admin/initRoutes.php
 WEB/public/pages/home.php
 WEB/public/pages/404.php
 WEB/public/views/home

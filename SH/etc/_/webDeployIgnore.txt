@@ -1,1 +1,1 @@
-private/admin/routes.ser
+private/config/routes.ser

@@ -5,6 +5,7 @@ use _\Utilities as _UT;
 class MysqlDB {
 	
 	protected
+		$logger,
 		$connection,
 		$fConnected,
 		$connectionString,
@@ -15,6 +16,7 @@ class MysqlDB {
 	
 	public function __construct(string $pHost, string $pDbName, string $pUser, ?string $pPassword, string $pCharSet = null, array $pOptions = []) {
 		
+		$this->logger = new _UT\Logger();
 		$this->connectionString = 'mysql:host=' . $pHost . ';dbname=' . $pDbName . ';charset=' . $pCharSet;
 		$this->connectionUser = $pUser;
 		$this->connectionPassword = $pPassword;
@@ -32,7 +34,7 @@ class MysqlDB {
 			$this->fConnected = true;
 		} catch(\PDOException $e) {
 			$this->fConnected = false;
-			_UT\Logger::writeLog('DATABASE CONNECTION', $e->getMessage());
+			$this->logger->write('DATABASE CONNECTION', $e->getMessage());
 		}
 
 		return $this->fConnected;

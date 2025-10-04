@@ -28,12 +28,11 @@ const NOT_FOUND_PAGE_NAME = '404';
 
 const CONFIG_DIR = __DIR__ . DIR_SEP;
 const PRIVATE_DIR = CONFIG_DIR . '..' . DIR_SEP;
-const ADMIN_DIR = PRIVATE_DIR . 'admin' . DIR_SEP;
 const CLASSES_DIR = PRIVATE_DIR . 'classes' . DIR_SEP;
 const LOG_DIR = PRIVATE_DIR . 'log' . DIR_SEP;
-const UPLOADED_FILES_DIR = PRIVATE_DIR . 'files' . DIR_SEP;
-const ROUTES_CACHE_PATH = ADMIN_DIR . 'routes.ser';
-const ROUTES_INIT_PATH = ADMIN_DIR . 'initRoutes.php';
+const FILES_DIR = PRIVATE_DIR . 'files' . DIR_SEP;
+const ROUTES_CACHE_PATH = CONFIG_DIR . 'routes.ser';
+const ROUTES_SETUP_PATH = CONFIG_DIR . 'setRoutes.php';
 
 # Public directories
 
