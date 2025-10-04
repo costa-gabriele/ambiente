@@ -78,14 +78,14 @@ In the `WEB/public` directory, there are two subdirectories intended for the web
 The .php files that contain the back-end elaboration should go in the `pages` directory, whereas `views` is for the front-end files (e.g. .html, .css, .js).  
 Each .php file in `pages` must have a corresponding subdirectory in `views`. For example, the front-end files for the page `pages/category1/page1.php` should go in the directory `public/views/category1/page1/`.  
 
-The HTML file for the page can be retrieved by the .php file using the static method `retrieve(viewName, viewData[, placeholderBehavior, return])` of the class `\_\Navigation\View` (in the directory `private/classes/_/Navigation`), where `viewName` is the path of the .html file relative to the `views` directory, without the extension (e.g. `category1/page1/main`) and `viewData` is an array containing the dynamic content of the page. The dynamic parts of the page can be handled with placeholders and tags that are parsed by the View class.
+The HTML file for the page can be retrieved by the .php file using the static method `retrieve(viewName, viewValues[, placeholderBehavior, return])` of the class `\_\Navigation\View` (in the directory `private/classes/_/Navigation`), where `viewName` is the path of the .html file relative to the `views` directory, without the extension (e.g. `category1/page1/main`) and `viewValues` is an array containing the dynamic content of the page. The dynamic parts of the page can be handled with placeholders and tags that are parsed by the View class.
 
 The Javascript module `public/views/_/_common/modules/_/req.js` provides a function to retrieve a view through an asynchronous call:  
 `retrieveView(viewName, serverElabData, clientElabData)`  
 The second argument is an object containing the values to be substituted server side (PHP), whereas the values provided in the third argument are processed client side (Javascript).
 
 ### Placeholders
-A placeholder for a dynamic value, to be substituted with the content received from the .php file, is enclosed by double curly braces (e.g. `{{text.title}}`); the `viewData` array passed as the second argument to the `View::retrieve` method should have a corresponding entry, i.e. `['text' => ['title' => 'The title of the page']]`.
+A placeholder for a dynamic value, to be substituted with the content received from the .php file, is enclosed by double curly braces (e.g. `{{text.title}}`); the `viewValues` array passed as the second argument to the `View::retrieve` method should have a corresponding entry, i.e. `['text' => ['title' => 'The title of the page']]`.
 
 ### Tags
 More complex operations can be performed on the view with tags. Tags are written inside HTML comments, and they too are enclosed  by double curly braces. Hence, the general syntax for a tag is: `<!--{{TAG(arg)}}-->`. The argument is not always present, and if a tag needs to be opened and closed, the opening tag has a colon before the closing braces and the closing one has a semicolon instead.
@@ -103,7 +103,12 @@ This tag encloses an HTML tag that has a `href` or `src` attribute, and transfor
 
 `<!--{{FOREACH(content):}}-->` / `<!--{{FOREACH(content);}}-->`  
 Repeats the HTML that it encloses for each element of the array indicated by the argument.  
+`content` is an element of the `viewValues` array passed as the second argument to the `View::retrieve` method.  
 Inside the loop, the placeholder `{{%#}}` stands for the current key of the array. If the array contains simple values, the current value is indicated by `{{%@}}`; if the value is itself an array, the value is indicated by the name of the key instead of the at sign.
+
+`<!--{{IF(condition):}}-->` / `<!--{{IF(condition);}}-->`  
+Allows to conditionally write a part of the HTML document.  
+`condition` is an element of the `viewValues` array passed as the second argument to the `View::retrieve` method; the value is tested with a simple PHP if(), so the standard PHP rules of evaluation apply.
 
 > [!NOTE]
 >
